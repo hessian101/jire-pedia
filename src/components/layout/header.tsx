@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import { UserNav } from "./user-nav"
-import { Bell, Search } from "lucide-react"
+import { Search } from "lucide-react"
 import { Session } from "next-auth"
+import { NotificationCenter } from "../notifications/notification-center"
 
 interface HeaderProps {
   session: Session | null
@@ -30,6 +31,18 @@ export function Header({ session }: HeaderProps) {
                 プレイ
               </Link>
               <Link
+                href="/daily-challenge"
+                className="text-sm font-medium text-gray-300 hover:text-cyan-400 transition-colors"
+              >
+                デイリー
+              </Link>
+              <Link
+                href="/leaderboard"
+                className="text-sm font-medium text-gray-300 hover:text-cyan-400 transition-colors"
+              >
+                ランキング
+              </Link>
+              <Link
                 href="/dictionary"
                 className="text-sm font-medium text-gray-300 hover:text-cyan-400 transition-colors"
               >
@@ -51,10 +64,7 @@ export function Header({ session }: HeaderProps) {
               <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
                 <Search className="w-5 h-5 text-gray-300" />
               </button>
-              <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
-                <Bell className="w-5 h-5 text-gray-300" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-[#FF3366] rounded-full"></span>
-              </button>
+              <NotificationCenter />
               <UserNav user={session.user} />
             </>
           ) : (

@@ -18,16 +18,27 @@ model User {
   level         Int       @default(1)
   xp            Int       @default(0)
   rank          String    @default("Bronze")
+  streak        Int       @default(0)
+  longestStreak Int       @default(0)
+  lastActiveAt  DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts      Account[]
-  sessions      Session[]
-  attempts      Attempt[]
-  entries       Entry[]
-  favorites     Favorite[]
+  accounts         Account[]
+  sessions         Session[]
+  attempts         Attempt[]
+  entries          Entry[]
+  favorites        Favorite[]
+  improvements     Improvement[]
+  badges           UserBadge[]
+  likes            Like[]
+  comments         Comment[]
+  notifications    Notification[]
+  userChallenges   UserChallenge[]
+  improvementVotes ImprovementVote[]
 
   @@index([email])
+  @@index([xp])
 }
 
 model Account {
@@ -80,9 +91,11 @@ model Term {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  attempts      Attempt[]
-  entries       Entry[]
-  favorites     Favorite[]
+  attempts        Attempt[]
+  entries         Entry[]
+  favorites       Favorite[]
+  improvements    Improvement[]
+  dailyChallenges DailyChallenge[]
 
   @@index([category])
   @@index([totalAttempts])
@@ -127,15 +140,20 @@ model Entry {
   hardScore      Float?
   version        Int       @default(1)
   likeCount      Int       @default(0)
+  commentCount   Int       @default(0)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  term           Term      @relation(fields: [termId], references: [id], onDelete: Cascade)
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  term           Term          @relation(fields: [termId], references: [id], onDelete: Cascade)
+  improvements   Improvement[]
+  likes          Like[]
+  comments       Comment[]
 
   @@index([userId])
   @@index([termId])
   @@index([isCrown])
+  @@index([likeCount])
 }
 
 // お気に入り
@@ -149,4 +167,167 @@ model Favorite {
   term      Term     @relation(fields: [termId], references: [id], onDelete: Cascade)
 
   @@unique([userId, termId])
+}
+
+// 共作モード - 改善提案
+model Improvement {
+  id                String    @id @default(cuid())
+  originalEntryId   String
+  userId            String
+  termId            String
+  newExplanation    String    @db.Text
+  improvementReason String?   @db.Text
+
+  beforeEasy        Float?
+  beforeNormal      Float?
+  beforeHard        Float?
+  afterEasy         Float
+  afterNormal       Float
+  afterHard         Float
+
+  status            String    @default("pending") // pending, approved, rejected
+  voteCount         Int       @default(0)
+  approvedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  originalEntry     Entry             @relation(fields: [originalEntryId], references: [id], onDelete: Cascade)
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  term              Term              @relation(fields: [termId], references: [id], onDelete: Cascade)
+  votes             ImprovementVote[]
+
+  @@index([originalEntryId])
+  @@index([userId])
+  @@index([status])
+  @@index([voteCount])
+}
+
+// 改善提案への投票
+model ImprovementVote {
+  id             String      @id @default(cuid())
+  improvementId  String
+  userId         String
+  voteType       String      // upvote, downvote
+  createdAt      DateTime    @default(now())
+
+  improvement    Improvement @relation(fields: [improvementId], references: [id], onDelete: Cascade)
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([improvementId, userId])
+  @@index([improvementId])
+  @@index([userId])
+}
+
+// バッジシステム
+model Badge {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  nameEn      String
+  description String      @db.Text
+  category    String      // beginner, expert, social, special
+  iconName    String
+  condition   String      @db.Text
+  rarity      String      @default("common") // common, rare, epic, legendary
+  createdAt   DateTime    @default(now())
+
+  users       UserBadge[]
+
+  @@index([category])
+  @@index([rarity])
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge    Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([badgeId])
+}
+
+// デイリーチャレンジ
+model DailyChallenge {
+  id         String          @id @default(cuid())
+  termId     String
+  date       DateTime        @unique
+  difficulty String
+  createdAt  DateTime        @default(now())
+
+  term       Term            @relation(fields: [termId], references: [id], onDelete: Cascade)
+  attempts   UserChallenge[]
+
+  @@index([date])
+  @@index([termId])
+}
+
+model UserChallenge {
+  id               String         @id @default(cuid())
+  userId           String
+  dailyChallengeId String
+  completed        Boolean        @default(false)
+  success          Boolean?
+  score            Float?
+  attemptedAt      DateTime       @default(now())
+
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyChallenge   DailyChallenge @relation(fields: [dailyChallengeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dailyChallengeId])
+  @@index([userId])
+  @@index([dailyChallengeId])
+}
+
+// いいねシステム
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  entryId   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entry     Entry    @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, entryId])
+  @@index([userId])
+  @@index([entryId])
+}
+
+// コメントシステム
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String
+  entryId   String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entry     Entry    @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([entryId])
+  @@index([createdAt])
+}
+
+// 通知システム
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // like, comment, improvement_approved, badge_earned, challenge_complete
+  title     String
+  message   String   @db.Text
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
 }

@@ -165,15 +165,168 @@ const terms = [
   },
 ]
 
+const badges = [
+  // Beginner badges
+  {
+    name: "はじめの一歩",
+    nameEn: "First Step",
+    description: "最初の説明に挑戦した",
+    category: "beginner",
+    iconName: "👶",
+    condition: "初回プレイ完了",
+    rarity: "common",
+  },
+  {
+    name: "継続は力なり",
+    nameEn: "Consistency",
+    description: "3日連続でログインした",
+    category: "beginner",
+    iconName: "📅",
+    condition: "3日連続ログイン",
+    rarity: "common",
+  },
+  {
+    name: "チャレンジャー",
+    nameEn: "Challenger",
+    description: "10回挑戦した",
+    category: "beginner",
+    iconName: "🎯",
+    condition: "10回プレイ",
+    rarity: "common",
+  },
+
+  // Expert badges
+  {
+    name: "説明の達人",
+    nameEn: "Explanation Master",
+    description: "50回成功した",
+    category: "expert",
+    iconName: "🎓",
+    condition: "50回成功",
+    rarity: "rare",
+  },
+  {
+    name: "完璧主義者",
+    nameEn: "Perfectionist",
+    description: "HARD難易度で10回成功した",
+    category: "expert",
+    iconName: "💎",
+    condition: "HARD 10回成功",
+    rarity: "epic",
+  },
+  {
+    name: "レジェンド",
+    nameEn: "Legend",
+    description: "100回成功した伝説の説明者",
+    category: "expert",
+    iconName: "👑",
+    condition: "100回成功",
+    rarity: "legendary",
+  },
+
+  // Social badges
+  {
+    name: "いいね職人",
+    nameEn: "Like Master",
+    description: "他のユーザーに10回いいねした",
+    category: "social",
+    iconName: "❤️",
+    condition: "10回いいね",
+    rarity: "common",
+  },
+  {
+    name: "コメンテーター",
+    nameEn: "Commentator",
+    description: "10回コメントした",
+    category: "social",
+    iconName: "💬",
+    condition: "10回コメント",
+    rarity: "common",
+  },
+  {
+    name: "人気者",
+    nameEn: "Popular",
+    description: "自分の説明が50いいねを獲得した",
+    category: "social",
+    iconName: "⭐",
+    condition: "50いいね獲得",
+    rarity: "rare",
+  },
+  {
+    name: "改善マスター",
+    nameEn: "Improvement Master",
+    description: "改善提案が5回採用された",
+    category: "social",
+    iconName: "🔧",
+    condition: "5回改善採用",
+    rarity: "epic",
+  },
+
+  // Special badges
+  {
+    name: "ストリークキング",
+    nameEn: "Streak King",
+    description: "30日連続でログインした",
+    category: "special",
+    iconName: "🔥",
+    condition: "30日連続ログイン",
+    rarity: "epic",
+  },
+  {
+    name: "デイリーチャンピオン",
+    nameEn: "Daily Champion",
+    description: "デイリーチャレンジを30回完了した",
+    category: "special",
+    iconName: "🏆",
+    condition: "30回デイリー完了",
+    rarity: "rare",
+  },
+  {
+    name: "博識",
+    nameEn: "Knowledgeable",
+    description: "全カテゴリーで成功した",
+    category: "special",
+    iconName: "📚",
+    condition: "全カテゴリー成功",
+    rarity: "rare",
+  },
+  {
+    name: "エリート",
+    nameEn: "Elite",
+    description: "レベル50に到達した",
+    category: "special",
+    iconName: "💫",
+    condition: "レベル50",
+    rarity: "legendary",
+  },
+]
+
 async function main() {
   console.log('シードデータの投入を開始します...')
 
+  // Terms
+  console.log('\n用語データの投入中...')
   for (const term of terms) {
-    await prisma.term.create({ data: term })
+    await prisma.term.upsert({
+      where: { word: term.word },
+      update: {},
+      create: term,
+    })
     console.log(`✓ ${term.word} を作成しました`)
   }
+  console.log(`✅ ${terms.length}個の用語を投入しました`)
 
-  console.log(`\n✅ ${terms.length}個の用語を投入しました`)
+  // Badges
+  console.log('\nバッジデータの投入中...')
+  for (const badge of badges) {
+    await prisma.badge.upsert({
+      where: { name: badge.name },
+      update: {},
+      create: badge,
+    })
+    console.log(`✓ ${badge.name} を作成しました`)
+  }
+  console.log(`✅ ${badges.length}個のバッジを投入しました`)
 }
 
 main()

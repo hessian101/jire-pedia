@@ -13,8 +13,14 @@ interface LayoutContentProps {
 export function LayoutContent({ children, session }: LayoutContentProps) {
   const pathname = usePathname()
 
-  // Hide header and nav for immersive feed experience
+  // Hide header and nav for immersive routes and auth pages
   const isImmersiveRoute = pathname?.startsWith("/feed")
+  const isAuthRoute = pathname?.startsWith("/login") || pathname?.startsWith("/register")
+
+  // Auth pages have their own full-page layouts
+  if (isAuthRoute) {
+    return <>{children}</>
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col">
