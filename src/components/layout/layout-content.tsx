@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation"
 import { Header } from "./header"
-import { BottomNav } from "./bottom-nav"
 import { Session } from "next-auth"
 
 interface LayoutContentProps {
@@ -26,7 +25,6 @@ export function LayoutContent({ children, session }: LayoutContentProps) {
     <div className="relative flex min-h-screen flex-col">
       {!isImmersiveRoute && <Header session={session} />}
       <main className="flex-1">{children}</main>
-      {session && !isImmersiveRoute && <BottomNav />}
     </div>
   )
 }

@@ -46,8 +46,10 @@ export function FeedContainer({ initialTerms }: FeedContainerProps) {
   const [cursor, setCursor] = useState<string | undefined>(
     initialTerms[initialTerms.length - 1]?.id
   )
+  const [currentCardIndex, setCurrentCardIndex] = useState(0)
 
   const observerTarget = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore || searchQuery) return
@@ -95,6 +97,7 @@ export function FeedContainer({ initialTerms }: FeedContainerProps) {
     }
   }, [loadMore, hasMore, isLoading])
 
+  // Filter terms based on search query
   const filteredTerms = useMemo(() => {
     if (!searchQuery) return terms
 
@@ -110,13 +113,54 @@ export function FeedContainer({ initialTerms }: FeedContainerProps) {
     })
   }, [terms, searchQuery])
 
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!containerRef.current) return
+
+      const maxIndex = filteredTerms.length - 1
+
+      if (e.key === "ArrowDown" || e.key === "Down") {
+        e.preventDefault()
+        if (currentCardIndex < maxIndex) {
+          const nextIndex = currentCardIndex + 1
+          setCurrentCardIndex(nextIndex)
+          const container = containerRef.current
+          container.scrollTo({
+            top: container.scrollHeight * (nextIndex / (maxIndex + 1)),
+            behavior: "smooth",
+          })
+        }
+      } else if (e.key === "ArrowUp" || e.key === "Up") {
+        e.preventDefault()
+        if (currentCardIndex > 0) {
+          const prevIndex = currentCardIndex - 1
+          setCurrentCardIndex(prevIndex)
+          const container = containerRef.current
+          container.scrollTo({
+            top: container.scrollHeight * (prevIndex / (maxIndex + 1)),
+            behavior: "smooth",
+          })
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [currentCardIndex, filteredTerms])
+
   return (
     <>
       <FeedSearch
         onSearch={setSearchQuery}
         onClear={() => setSearchQuery("")}
       />
-      <div className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar">
+      <div
+        ref={containerRef}
+        className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar"
+        role="feed"
+        aria-label="用語フィード"
+      >
         {filteredTerms.length > 0 ? (
           <>
             {filteredTerms.map((term) => (

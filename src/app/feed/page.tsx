@@ -42,5 +42,5 @@ export default async function FeedPage() {
     },
   })
 
-  return <FeedContainer initialTerms={terms} />
+  return <FeedContainer initialTerms={terms as any} />
 }

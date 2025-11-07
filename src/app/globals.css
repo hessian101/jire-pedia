@@ -69,4 +69,70 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Knowledge Sphere animations */
+  @keyframes sphereFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-50%) scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+  }
+
+  @keyframes sphereFadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-50%) scale(0.8);
+    }
+  }
+
+  .knowledge-sphere-container {
+    animation: sphereFadeIn 0.3s ease-out forwards;
+  }
+
+  .knowledge-sphere-container.fade-out {
+    animation: sphereFadeOut 0.2s ease-in forwards;
+  }
+
+  /* Dictionary link enhanced styles */
+  .dictionary-link {
+    position: relative;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 100, 255, 0.1));
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .dictionary-link:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 100, 255, 0.2));
+    border-color: rgba(0, 255, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), 0 0 40px rgba(0, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .knowledge-sphere-container {
+      animation: none;
+      opacity: 1;
+    }
+
+    .dictionary-link {
+      transition: none;
+    }
+
+    .dictionary-link:hover {
+      transform: none;
+    }
+  }
 }
