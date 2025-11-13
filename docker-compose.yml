@@ -31,14 +31,15 @@ services:
       - .env.local
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/jire_pedia?schema=public
+      - WATCHPACK_POLLING=true
     volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./prisma:/app/prisma
+      - ./.env.local:/app/.env.local
     depends_on:
       db:
         condition: service_healthy
-    command: npm run dev
 
 volumes:
   postgres_data:
