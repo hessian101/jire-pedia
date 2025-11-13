@@ -2,11 +2,17 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import { UserNav } from "./user-nav"
 import { Search } from "lucide-react"
 import { Session } from "next-auth"
 import { NotificationCenter } from "../notifications/notification-center"
-import { KnowledgeSphere } from "../common/KnowledgeSphere"
+
+// Dynamically import KnowledgeSphere with SSR disabled to avoid Three.js SSR issues
+const KnowledgeSphere = dynamic(
+  () => import("../common/KnowledgeSphere").then((mod) => mod.KnowledgeSphere),
+  { ssr: false }
+)
 
 interface HeaderProps {
   session: Session | null
