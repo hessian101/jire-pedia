@@ -27,9 +27,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { MotionButton } from "@/components/ui/motion-button"
-import { fireConfetti } from "@/lib/confetti"
+import { runConfetti } from "@/lib/confetti"
 
 const categories = [
     "Science",
@@ -133,7 +133,7 @@ export default function SubmitTermPage() {
                 throw new Error(error.message || "Submission failed")
             }
 
-            fireConfetti()
+            runConfetti()
             toast({
                 title: "投稿完了！",
                 description: "新しい用語が登録されました。",
