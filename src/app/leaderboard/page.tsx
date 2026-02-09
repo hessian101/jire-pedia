@@ -24,21 +24,21 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const fetchLeaderboard = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch(`/api/leaderboard?period=${period}`)
+        const data = await response.json()
+        setLeaderboard(data.leaderboard)
+      } catch (error) {
+        console.error("Failed to fetch leaderboard:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     fetchLeaderboard()
   }, [period])
-
-  const fetchLeaderboard = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch(`/api/leaderboard?period=${period}`)
-      const data = await response.json()
-      setLeaderboard(data.leaderboard)
-    } catch (error) {
-      console.error("Failed to fetch leaderboard:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -90,11 +90,10 @@ export default function LeaderboardPage() {
             <button
               key={p.value}
               onClick={() => setPeriod(p.value as Period)}
-              className={`px-6 py-2 rounded-full font-medium transition-all ${
-                period === p.value
+              className={`px-6 py-2 rounded-full font-medium transition-all ${period === p.value
                   ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/50"
                   : "bg-white/5 text-gray-400 hover:bg-white/10"
-              }`}
+                }`}
             >
               {p.label}
             </button>
@@ -129,17 +128,16 @@ export default function LeaderboardPage() {
                         {entry.name || "Unknown User"}
                       </h3>
                       <span
-                        className={`px-2 py-0.5 text-xs rounded-full ${
-                          entry.userRank === "Bronze"
+                        className={`px-2 py-0.5 text-xs rounded-full ${entry.userRank === "Bronze"
                             ? "bg-amber-900/30 text-amber-500"
                             : entry.userRank === "Silver"
-                            ? "bg-gray-700/30 text-gray-300"
-                            : entry.userRank === "Gold"
-                            ? "bg-yellow-900/30 text-yellow-400"
-                            : entry.userRank === "Platinum"
-                            ? "bg-cyan-900/30 text-cyan-400"
-                            : "bg-purple-900/30 text-purple-400"
-                        }`}
+                              ? "bg-gray-700/30 text-gray-300"
+                              : entry.userRank === "Gold"
+                                ? "bg-yellow-900/30 text-yellow-400"
+                                : entry.userRank === "Platinum"
+                                  ? "bg-cyan-900/30 text-cyan-400"
+                                  : "bg-purple-900/30 text-purple-400"
+                          }`}
                       >
                         {entry.userRank}
                       </span>
