@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import dynamic from "next/dynamic"
 import { UserNav } from "./user-nav"
-import { Search, Menu, ChevronDown, Gamepad2, Flame, Calendar, Book } from "lucide-react"
+import { Search, Menu, ChevronDown, Gamepad2, Flame, Calendar, Book, PlusCircle } from "lucide-react"
 import { Session } from "next-auth"
 import { NotificationCenter } from "../notifications/notification-center"
 import {
@@ -102,6 +102,14 @@ export function Header({ session }: HeaderProps) {
                           className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-colors"
                         >
                           <span>プロフィール</span>
+                        </Link>
+                        <Link
+                          href="/term/submit"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center gap-3 px-2 py-2 text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 rounded-lg transition-colors border border-cyan-500/20"
+                        >
+                          <PlusCircle className="w-4 h-4" />
+                          <span>用語を追加する</span>
                         </Link>
                       </div>
                     </>
@@ -207,6 +215,14 @@ export function Header({ session }: HeaderProps) {
           <div className="flex items-center gap-4">
             {session ? (
               <>
+                <Link
+                  href="/term/submit"
+                  className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 text-cyan-400 rounded-full transition-all hover:scale-105"
+                  title="用語を追加"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span className="text-xs font-bold">ADD</span>
+                </Link>
                 <button className="hidden md:block p-2 hover:bg-white/10 rounded-full transition-colors">
                   <Search className="w-5 h-5 text-gray-300" />
                 </button>

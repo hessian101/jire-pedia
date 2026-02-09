@@ -128,3 +128,44 @@ export async function checkNGWithAI(
     return { isNG: false, reason: "" }
   }
 }
+
+// 用語のメタデータ（定義、NGワード）を生成
+export async function generateTermMeta(word: string, category?: string) {
+  const prompt = `
+あなたは辞書編集者です。
+用語「${word}」${category ? `（カテゴリ: ${category}）` : ""}について、以下の情報を生成してください。
+
+1. **officialDef**: 辞書的な簡潔で正確な定義（100文字以内）。
+2. **ngWords**: この用語を説明するゲームにおいて、使用を禁止すべき単語（その単語自体や、答えがすぐに分かってしまう重要なキーワード）を5つ程度。
+
+出力は以下のJSON形式のみでお願いします。余計な文字列は含めないでください。
+{
+  "officialDef": "...",
+  "ngWords": ["...", "..."]
+}
+`
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    const text = response.text()
+
+    // JSON部分を抽出
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) throw new Error("Invalid AI response format")
+
+    const data = JSON.parse(jsonMatch[0])
+    return {
+      officialDef: data.officialDef,
+      ngWords: data.ngWords
+    }
+  } catch (error) {
+    console.error("AI Generation Error:", error)
+    // フォールバック
+    return {
+      officialDef: `${word}とは...（AI生成に失敗しました）`,
+      ngWords: [word]
+    }
+  }
+}

@@ -37,6 +37,7 @@ model User {
   userChallenges   UserChallenge[]
   improvementVotes ImprovementVote[]
   gameStats        UserGameStats?
+  createdTerms     Term[]    @relation("CreatedTerms")
 
   @@index([email])
   @@index([xp])
@@ -89,8 +90,13 @@ model Term {
   totalSuccess  Int       @default(0)
   viewCount     Int       @default(0)
   favoriteCount Int       @default(0)
+  difficulty    String    @default("NORMAL")
+  creatorId     String?
+  status        String    @default("APPROVED")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  creator         User?     @relation("CreatedTerms", fields: [creatorId], references: [id])
 
   attempts        Attempt[]
   entries         Entry[]
