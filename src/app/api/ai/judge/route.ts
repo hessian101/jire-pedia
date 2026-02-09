@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { judgeWithGemini, judgeWithGroq } from "@/lib/ai"
+import { judgeWithGemini, judgeWithGroq, checkNGWithAI } from "@/lib/ai"
 import { calculateXP, checkLevelUp, getRankFromLevel } from "@/lib/xp"
 import { checkNGWords } from "@/lib/ng-word-checker"
 import { z } from "zod"
@@ -42,6 +42,15 @@ export async function POST(request: NextRequest) {
     if (hasNGWord) {
       return NextResponse.json(
         { message: `NGワードが含まれています: ${foundWords.join(", ")}` },
+        { status: 400 }
+      )
+    }
+
+    // AIによる公平性の詳細チェック
+    const aiNGResult = await checkNGWithAI(explanation, term.word)
+    if (aiNGResult.isNG) {
+      return NextResponse.json(
+        { message: `説明が不適切です: ${aiNGResult.reason}` },
         { status: 400 }
       )
     }

@@ -141,22 +141,7 @@ export function KnowledgeSphere({ className = '' }: KnowledgeSphereProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Cleanup on unmount
-  useEffect(() => {
-    const container = containerRef.current
-    return () => {
-      // Cleanup three.js resources
-      if (container) {
-        const canvas = container.querySelector('canvas')
-        if (canvas) {
-          const gl = canvas.getContext('webgl') || canvas.getContext('webgl2')
-          if (gl) {
-            const loseContext = gl.getExtension('WEBGL_lose_context')
-            if (loseContext) loseContext.loseContext()
-          }
-        }
-      }
-    }
-  }, [])
+  // No manual cleanup needed for R3F
 
   return (
     <div

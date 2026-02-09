@@ -29,33 +29,63 @@ export async function GET(request: NextRequest) {
     })
 
     // 今日のチャレンジがまだない場合は作成
+    // 今日のチャレンジがまだない場合は作成
     if (!dailyChallenge) {
-      // ランダムに用語を選択
-      const count = await prisma.term.count()
-      const skip = Math.floor(Math.random() * count)
+      // 1. 前回のチャレンジを取得してカテゴリを確認
+      const lastChallenge = await prisma.dailyChallenge.findFirst({
+        orderBy: { date: "desc" },
+        include: { term: true },
+      })
+      const lastCategory = lastChallenge?.term.category
 
-      const randomTerm = await prisma.term.findFirst({
-        skip,
-        take: 1,
+      // 2. 難易度を決定（曜日による変動）
+      const dayOfWeek = today.getDay() // 0: Sun, 1: Mon, ..., 6: Sat
+      let targetDifficulty = "NORMAL"
+
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        targetDifficulty = "HARD" // 週末は難しい
+      } else if (dayOfWeek === 1) {
+        targetDifficulty = "EASY" // 月曜は易しい
+      } else {
+        const difficulties = ["EASY", "NORMAL", "HARD"]
+        targetDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)]
+      }
+
+      // 3. 用語を選定（カテゴリローテーション）
+      let candidateTerm = null
+
+      // 前回と違うカテゴリの用語を優先的に探す
+      const termsCount = await prisma.term.count({
+        where: lastCategory ? { category: { not: lastCategory } } : undefined
       })
 
-      if (!randomTerm) {
+      if (termsCount > 0) {
+        const skip = Math.floor(Math.random() * termsCount)
+        candidateTerm = await prisma.term.findFirst({
+          where: lastCategory ? { category: { not: lastCategory } } : undefined,
+          skip,
+        })
+      }
+
+      // 見つからなければ（または初回なら）完全にランダムで取得
+      if (!candidateTerm) {
+        const totalCount = await prisma.term.count()
+        const skip = Math.floor(Math.random() * totalCount)
+        candidateTerm = await prisma.term.findFirst({ skip })
+      }
+
+      if (!candidateTerm) {
         return NextResponse.json(
-          { error: "用語が見つかりません" },
+          { error: "用語が見つかりません（データ不足）" },
           { status: 404 }
         )
       }
 
-      // ランダムに難易度を選択
-      const difficulties = ["EASY", "NORMAL", "HARD"]
-      const randomDifficulty =
-        difficulties[Math.floor(Math.random() * difficulties.length)]
-
       dailyChallenge = await prisma.dailyChallenge.create({
         data: {
-          termId: randomTerm.id,
+          termId: candidateTerm.id,
           date: today,
-          difficulty: randomDifficulty,
+          difficulty: targetDifficulty,
         },
         include: {
           term: true,

@@ -76,3 +76,55 @@ export async function judgeWithGroq(
     success,
   }
 }
+
+export interface NGCheckResult {
+  isNG: boolean
+  reason: string
+}
+
+function createNGCheckPrompt(explanation: string, word: string): string {
+  return `あなたはクイズの公平性を判定するAI審判です。
+ユーザーが「${word}」という言葉を説明しようとしています。
+以下の説明文が、クイズとして適切か（答えを直接言っていないか、安易な翻訳でないか）を判定してください。
+
+説明文: ${explanation}
+
+判定基準:
+1. 答えの単語「${word}」そのものが含まれている場合はNG。
+2. 答えの単語の漢字違い、読み仮名、英語訳などがそのまま含まれている場合はNG。
+3. "It is..." のように、単にその単語を翻訳しただけの文章はNG。
+4. それ以外はOK。
+
+以下の形式で回答してください（JSON形式のみ）:
+{
+  "isNG": true または false,
+  "reason": "NGの場合の理由（OKの場合は空文字）"
+}
+`
+}
+
+export async function checkNGWithAI(
+  explanation: string,
+  word: string
+): Promise<NGCheckResult> {
+  // Use Gemini Flash for speed and cost effectiveness
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+  try {
+    const result = await model.generateContent(createNGCheckPrompt(explanation, word))
+    const text = result.response.text()
+
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) return { isNG: false, reason: "" } // Fallback to safe if parse fails
+
+    const parsed = JSON.parse(jsonMatch[0])
+    return {
+      isNG: parsed.isNG,
+      reason: parsed.reason,
+    }
+  } catch (error) {
+    console.error("AI NG Check failed:", error)
+    // On error, let it pass (fail open) to avoid blocking users unnecessarily,
+    // or you could choose to fail closed depending on requirements.
+    return { isNG: false, reason: "" }
+  }
+}
