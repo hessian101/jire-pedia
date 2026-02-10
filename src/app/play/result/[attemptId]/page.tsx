@@ -8,9 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default async function ResultPage({ params }: { params: { attemptId: string } }) {
   const session = await auth()
 
-  if (!session) {
-    redirect("/login")
-  }
+
 
   const attempt = await prisma.attempt.findUnique({
     where: { id: params.attemptId },
@@ -20,26 +18,30 @@ export default async function ResultPage({ params }: { params: { attemptId: stri
     },
   })
 
-  if (!attempt || attempt.userId !== session.user.id) {
+  // ユーザーIDが一致するか、ゲスト（userIdがnull）の場合のみ表示
+  if (!attempt || (attempt.userId && attempt.userId !== session?.user?.id)) {
     return (
       <div className="container py-10">
         <Card>
           <CardHeader>
             <CardTitle>エラー</CardTitle>
-            <CardDescription>結果が見つかりません</CardDescription>
+            <CardDescription>結果が見つかりません、またはアクセス権がありません</CardDescription>
           </CardHeader>
         </Card>
       </div>
     )
   }
 
-  // すでにエントリーが存在するかチェック
-  const existingEntry = await prisma.entry.findFirst({
-    where: {
-      userId: session.user.id,
-      termId: attempt.termId,
-    },
-  })
+  // すでにエントリーが存在するかチェック (ログイン時のみ)
+  let existingEntry = null
+  if (session?.user?.id && attempt.userId) {
+    existingEntry = await prisma.entry.findFirst({
+      where: {
+        userId: session.user.id,
+        termId: attempt.termId,
+      },
+    })
+  }
 
   return (
     <div className="container py-10">
@@ -85,13 +87,12 @@ export default async function ResultPage({ params }: { params: { attemptId: stri
               <div className="flex items-center gap-4">
                 <div className="flex-1 bg-gray-200 rounded-full h-4">
                   <div
-                    className={`h-4 rounded-full ${
-                      attempt.confidence >= 80
-                        ? "bg-green-500"
-                        : attempt.confidence >= 50
+                    className={`h-4 rounded-full ${attempt.confidence >= 80
+                      ? "bg-green-500"
+                      : attempt.confidence >= 50
                         ? "bg-yellow-500"
                         : "bg-red-500"
-                    }`}
+                      }`}
                     style={{ width: `${attempt.confidence}%` }}
                   />
                 </div>

@@ -73,6 +73,7 @@ export async function GET(request: NextRequest) {
         by: ["userId"],
         where: {
           success: true,
+          userId: { not: null } as any,
           ...dateFilter,
         },
         _count: {
@@ -89,7 +90,9 @@ export async function GET(request: NextRequest) {
         take: limit,
       })
 
-      const userIds = attempts.map((a) => a.userId)
+      const userIds = attempts
+        .map((a) => a.userId)
+        .filter((id): id is string => !!id)
 
       const users = await prisma.user.findMany({
         where: {
@@ -109,18 +112,21 @@ export async function GET(request: NextRequest) {
       const userMap = new Map(users.map((u) => [u.id, u]))
 
       const leaderboard = attempts.map((attempt, index) => {
+        if (!attempt.userId) return null
         const user = userMap.get(attempt.userId)
+        if (!user) return null
+
         return {
           rank: index + 1,
           userId: attempt.userId,
-          name: user?.name,
-          image: user?.image,
-          level: user?.level,
-          userRank: user?.rank,
-          successCount: attempt._count.id,
-          xpEarned: attempt._sum.xpEarned || 0,
+          name: user.name,
+          image: user.image,
+          level: user.level,
+          userRank: user.rank,
+          successCount: (attempt._count as any).id || 0,
+          xpEarned: (attempt._sum as any).xpEarned || 0,
         }
-      })
+      }).filter((item): item is NonNullable<typeof item> => item !== null)
 
       return NextResponse.json({ leaderboard, period }, { status: 200 })
     }

@@ -56,46 +56,46 @@ export function Header({ session }: HeaderProps) {
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col gap-4">
-                  {session && (
-                    <>
-                      <div className="space-y-2">
-                        <h4 className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Play</h4>
-                        <Link
-                          href="/play/select"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-colors"
-                        >
-                          <Gamepad2 className="w-4 h-4" />
-                          <span>モード選択</span>
-                        </Link>
-                        <Link
-                          href="/daily-challenge"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-colors"
-                        >
-                          <Calendar className="w-4 h-4" />
-                          <span>デイリーチャレンジ</span>
-                        </Link>
-                      </div>
+                  <div className="space-y-2">
+                    <h4 className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Play</h4>
+                    <Link
+                      href="/play/select"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-colors"
+                    >
+                      <Gamepad2 className="w-4 h-4" />
+                      <span>モード選択</span>
+                    </Link>
+                    <Link
+                      href="/daily-challenge"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-colors"
+                    >
+                      <Calendar className="w-4 h-4" />
+                      <span>デイリーチャレンジ</span>
+                    </Link>
+                  </div>
 
-                      <div className="space-y-2">
-                        <h4 className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Learn</h4>
-                        <Link
-                          href="/dictionary"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-colors"
-                        >
-                          <Book className="w-4 h-4" />
-                          <span>用語辞書</span>
-                        </Link>
-                        <Link
-                          href="/leaderboard"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-colors"
-                        >
-                          <Flame className="w-4 h-4" />
-                          <span>ランキング</span>
-                        </Link>
+                  <div className="space-y-2">
+                    <h4 className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Learn</h4>
+                    <Link
+                      href="/dictionary"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-colors"
+                    >
+                      <Book className="w-4 h-4" />
+                      <span>用語辞書</span>
+                    </Link>
+                    <Link
+                      href="/leaderboard"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-2 py-2 text-gray-300 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-colors"
+                    >
+                      <Flame className="w-4 h-4" />
+                      <span>ランキング</span>
+                    </Link>
+                    {session && (
+                      <>
                         <Link
                           href="/profile"
                           onClick={() => setIsMobileMenuOpen(false)}
@@ -111,9 +111,9 @@ export function Header({ session }: HeaderProps) {
                           <PlusCircle className="w-4 h-4" />
                           <span>用語を追加する</span>
                         </Link>
-                      </div>
-                    </>
-                  )}
+                      </>
+                    )}
+                  </div>
                   {!session && (
                     <div className="flex flex-col gap-2 mt-4">
                       <Link
@@ -144,72 +144,73 @@ export function Header({ session }: HeaderProps) {
           </div>
 
           {/* Center section - Desktop Navigation */}
-          {session && (
-            <nav className="hidden md:flex items-center gap-6 absolute left-1/2 transform -translate-x-1/2">
+          <nav className="hidden md:flex items-center gap-6 absolute left-1/2 transform -translate-x-1/2">
 
-              {/* Play Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-gray-300 hover:text-cyan-400 transition-colors focus:outline-none">
-                  プレイ
-                  <ChevronDown className="w-4 h-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-48 bg-[#1a1d2e] border-cyan-500/20 text-gray-200">
-                  <DropdownMenuItem asChild>
-                    <Link href="/play/select" className="flex items-center gap-2 cursor-pointer hover:bg-white/5 hover:text-cyan-400 focus:bg-white/5 focus:text-cyan-400">
-                      <Gamepad2 className="w-4 h-4" />
-                      モード選択
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/daily-challenge" className="flex items-center gap-2 cursor-pointer hover:bg-white/5 hover:text-cyan-400 focus:bg-white/5 focus:text-cyan-400">
-                      <Calendar className="w-4 h-4" />
-                      デイリーチャレンジ
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dictionary/trending" className="flex items-center gap-2 cursor-pointer hover:bg-white/5 hover:text-cyan-400 focus:bg-white/5 focus:text-cyan-400">
-                      <Flame className="w-4 h-4" />
-                      急上昇ワード
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            {/* Play Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-gray-300 hover:text-cyan-400 transition-colors focus:outline-none">
+                プレイ
+                <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48 bg-[#1a1d2e] border-cyan-500/20 text-gray-200">
+                <DropdownMenuItem asChild>
+                  <Link href="/play/select" className="flex items-center gap-2 cursor-pointer hover:bg-white/5 hover:text-cyan-400 focus:bg-white/5 focus:text-cyan-400">
+                    <Gamepad2 className="w-4 h-4" />
+                    モード選択
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/daily-challenge" className="flex items-center gap-2 cursor-pointer hover:bg-white/5 hover:text-cyan-400 focus:bg-white/5 focus:text-cyan-400">
+                    <Calendar className="w-4 h-4" />
+                    デイリーチャレンジ
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dictionary/trending" className="flex items-center gap-2 cursor-pointer hover:bg-white/5 hover:text-cyan-400 focus:bg-white/5 focus:text-cyan-400">
+                    <Flame className="w-4 h-4" />
+                    急上昇ワード
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-              {/* Enhanced Dictionary Link with KnowledgeSphere */}
-              <div
-                className="relative group"
-                onMouseEnter={() => setShowSphere(true)}
-                onMouseLeave={() => setShowSphere(false)}
-              >
-                <Link
-                  href="/dictionary"
-                  className="relative z-10 flex items-center gap-1 text-sm font-medium text-gray-300 group-hover:text-cyan-400 transition-colors"
-                >
-                  辞書
-                </Link>
-
-                {/* Knowledge Sphere appears on hover - fixed positioning to avoid layout shift */}
-                {showSphere && (
-                  <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 pointer-events-none">
-                    <KnowledgeSphere />
-                  </div>
-                )}
-              </div>
-
+            {/* Enhanced Dictionary Link with KnowledgeSphere */}
+            <div
+              className="relative group"
+              onMouseEnter={() => setShowSphere(true)}
+              onMouseLeave={() => setShowSphere(false)}
+            >
               <Link
-                href="/leaderboard"
-                className="text-sm font-medium text-gray-300 hover:text-cyan-400 transition-colors"
+                href="/dictionary"
+                className="relative z-10 flex items-center gap-1 text-sm font-medium text-gray-300 group-hover:text-cyan-400 transition-colors"
               >
-                ランキング
+                辞書
               </Link>
+
+              {/* Knowledge Sphere appears on hover - fixed positioning to avoid layout shift */}
+              {showSphere && (
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 pointer-events-none">
+                  <KnowledgeSphere />
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/leaderboard"
+              className="text-sm font-medium text-gray-300 hover:text-cyan-400 transition-colors"
+            >
+              ランキング
+            </Link>
+
+            {session && (
               <Link
                 href="/profile"
                 className="text-sm font-medium text-gray-300 hover:text-cyan-400 transition-colors"
               >
                 プロフィール
               </Link>
-            </nav>
-          )}
+            )}
+          </nav>
 
           {/* Right section - User controls */}
           <div className="flex items-center gap-4">

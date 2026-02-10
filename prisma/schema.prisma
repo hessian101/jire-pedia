@@ -112,7 +112,7 @@ model Term {
 // 挑戦記録
 model Attempt {
   id          String   @id @default(cuid())
-  userId      String
+  userId      String?
   termId      String
   difficulty  String
   aiModel     String
@@ -124,7 +124,7 @@ model Attempt {
   xpEarned    Int      @default(0)
   createdAt   DateTime @default(now())
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   term        Term     @relation(fields: [termId], references: [id], onDelete: Cascade)
 
   @@index([userId])

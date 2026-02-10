@@ -7,12 +7,7 @@ import { MobileContentSwitcher } from "@/components/home/mobile-content-switcher
 import { Sparkles } from "lucide-react"
 
 export default async function HomePage() {
-  const session = await auth()
 
-  // Redirect to login if not authenticated
-  if (!session) {
-    redirect("/login")
-  }
 
   return (
     <div className="min-h-screen pb-40 bg-gradient-to-b from-background to-background/50">

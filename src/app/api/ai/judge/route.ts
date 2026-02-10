@@ -15,12 +15,7 @@ const judgeSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session) {
-      return NextResponse.json(
-        { message: "認証が必要です" },
-        { status: 401 }
-      )
-    }
+
 
     const body = await request.json()
     const { termId, explanation, difficulty } = judgeSchema.parse(body)
@@ -81,22 +76,18 @@ export async function POST(request: NextRequest) {
     // XP計算
     const xpEarned = aiResult.success ? calculateXP(difficulty, aiResult.confidence) : 0
 
-    // ユーザー情報を取得
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-    })
-
-    if (!user) {
-      return NextResponse.json(
-        { message: "ユーザーが見つかりません" },
-        { status: 404 }
-      )
+    // ユーザー情報を取得 (ログインしている場合)
+    let user = null
+    if (session?.user?.id) {
+      user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+      })
     }
 
     // Attemptレコードを作成
     const attempt = await prisma.attempt.create({
       data: {
-        userId: session.user.id,
+        userId: session?.user?.id as any,  // ゲストの場合はundefined (DBではNULL)
         termId: term.id,
         difficulty,
         aiModel,
@@ -105,12 +96,12 @@ export async function POST(request: NextRequest) {
         confidence: aiResult.confidence,
         aiResponse: aiResult.aiGuess,
         aiComment: aiResult.reasoning,
-        xpEarned,
+        xpEarned, // ゲストでも記録はするが表示のみに使用
       },
     })
 
-    // ユーザーのXPとレベルを更新
-    if (aiResult.success) {
+    // ユーザーのXPとレベルを更新（ログインしている場合のみ）
+    if (aiResult.success && user && session?.user?.id) {
       let newXP = user.xp + xpEarned
       let newLevel = user.level
       let newRank = user.rank
@@ -145,6 +136,7 @@ export async function POST(request: NextRequest) {
       attemptId: attempt.id,
       success: aiResult.success,
       xpEarned,
+      isGuest: !session,
     })
   } catch (error) {
     console.error("Judge error:", error)

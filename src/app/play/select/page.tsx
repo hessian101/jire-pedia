@@ -6,11 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default async function SelectTermPage() {
-  const session = await auth()
 
-  if (!session) {
-    redirect("/login")
-  }
 
   // ランダムに用語を取得
   const termCount = await prisma.term.count()
