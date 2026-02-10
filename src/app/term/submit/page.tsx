@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { ArrowLeft, Loader2, Sparkles, Send } from "lucide-react"
+import { ArrowLeft, Loader2, Sparkles, Send, LogIn, User } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -55,9 +56,63 @@ const formSchema = z.object({
 
 export default function SubmitTermPage() {
     const router = useRouter()
+    const { data: session, status } = useSession()
     const { toast } = useToast()
     const [isGenerating, setIsGenerating] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isGuestMode, setIsGuestMode] = useState(false)
+
+    // ローディング中
+    if (status === "loading") {
+        return (
+            <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+            </div>
+        )
+    }
+
+    // 未ログインかつゲストモード未選択の場合
+    if (!session && !isGuestMode) {
+        return (
+            <div className="min-h-screen bg-[#0a0a0f] text-gray-100 py-12 px-4 flex items-center justify-center">
+                <div className="max-w-md w-full bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-sm text-center">
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4">
+                        用語を登録するには
+                    </h1>
+                    <p className="text-gray-400 mb-8">
+                        アカウントにログインして登録するか、ゲストとして匿名で投稿するかを選択してください。
+                    </p>
+
+                    <div className="space-y-4">
+                        <Link href="/login" className="block w-full">
+                            <Button className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-6 h-auto">
+                                <LogIn className="w-5 h-5 mr-2" />
+                                ログイン / 新規登録
+                            </Button>
+                        </Link>
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-white/10" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-[#0a0a0f] px-2 text-gray-500">OR</span>
+                            </div>
+                        </div>
+
+                        <Button
+                            variant="outline"
+                            className="w-full border-white/20 text-gray-300 hover:bg-white/10 hover:text-white py-6 h-auto"
+                            onClick={() => setIsGuestMode(true)}
+                        >
+                            <User className="w-5 h-5 mr-2" />
+                            ゲストとして投稿する
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -94,6 +149,7 @@ export default function SubmitTermPage() {
             if (!response.ok) throw new Error("Generation failed")
 
             const data = await response.json()
+            console.log(data)
             form.setValue("officialDef", data.officialDef)
             form.setValue("ngWords", data.ngWords.join(", ")) // カンマ区切りで表示
 
@@ -120,6 +176,7 @@ export default function SubmitTermPage() {
             const submitData = {
                 ...values,
                 ngWords: values.ngWords.split(",").map(w => w.trim()).filter(w => w),
+                isGuest: !session, // ゲストフラグ
             }
 
             const response = await fetch("/api/term/submit", {
@@ -171,6 +228,7 @@ export default function SubmitTermPage() {
                     </h1>
                     <p className="text-gray-400 mt-2">
                         あなたの知っている「ジレる言葉」をみんなに出題しましょう。
+                        {!session && <span className="ml-2 text-cyan-400 text-sm">(ゲスト投稿モード)</span>}
                     </p>
                 </div>
 
